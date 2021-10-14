@@ -1,0 +1,58 @@
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+from sklearn.naive_bayes import GaussianNB
+from sklearn.metrics import confusion_matrix, accuracy_score, f1_score
+import numpy as np
+import matplotlib.pyplot as plt
+import pandas as pd
+
+dataset = pd.read_csv('https://raw.githubusercontent.com/mk-gurucharan/Classification/master/IrisDataset.csv')
+X = dataset.iloc[:, :4].values
+y = dataset['species'].values
+# print(X,y)
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)
+
+sc = StandardScaler()
+X_train = sc.fit_transform(X_train)
+X_test = sc.transform(X_test)
+
+
+classifier = GaussianNB()
+classifier.fit(X_train, y_train)
+
+y_pred = classifier.predict(X_test) 
+print(y_pred)
+
+cm = confusion_matrix(y_test, y_pred)
+print(cm)
+
+# print ("Accuracy : ", accuracy_score(y_test, y_pred))
+
+FP = cm.sum(axis=0) - np.diag(cm)
+FN = cm.sum(axis=1) - np.diag(cm)
+TP = np.diag(cm)
+TN = cm.sum() - (FP + FN + TP)
+
+FP = FP.astype(float)
+FN = FN.astype(float)
+TP = TP.astype(float)
+TN = TN.astype(float)
+
+# Sensitivity, hit rate, recall, or true positive rate
+TPR = TP/(TP+FN)
+# Specificity or true negative rate
+TNR = TN/(TN+FP) 
+# Precision or positive predictive value
+PPV = TP/(TP+FP)
+# Fall out or false positive rate
+FPR = FP/(FP+TN)
+# False negative rate
+FNR = FN/(TP+FN)
+# Overall accuracy for each class
+ACC = (TP+TN)/(TP+FP+FN+TN)
+# print(ACC)
+
+F1 = 2 * (PPV * TPR) / (PPV + TPR)
+
+print(f"TPR: {TPR}\nTNR: {TNR}\nFPR: {FPR}\nFNR:{FNR}\nPrecision: {PPV}\nF1 Score: {F1}")
